@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?> 
 <application xmlns="http://ns.adobe.com/air/application/2.5"> 
-    <id>net.zhuoweizhang.newbrowser</id> 
+    <id>net.zhuoweizhang.fakeuseragentbrowser</id> 
     <versionNumber>1.0.0</versionNumber> 
-    <filename>NewBrowser</filename> 
-    <name>NewBrowser</name>
+    <filename>FakeUserAgentBrowser</filename> 
+    <name>Fake UserAgent Browser</name>
     <initialWindow> 
         <content>Browser.swf</content> 
         <visible>true</visible> 

@@ -20,6 +20,7 @@ import qnx.events.ExtendedLocationChangeEvent;
 
 [SWF(width="1024", height="600", frameRate="30", backgroundColor="#ffffff")]
 public class Browser extends Sprite{
+	public static const FIREFOX_USER_AGENT:String = "Mozilla/5.0 (Windows NT 6.1; rv:2.0.1) Gecko/20100101 Firefox/4.0.1"
 	public var mainContainer:Container;
 	public var toolbar:Container;
 	public var controls:Dictionary = new Dictionary();
@@ -45,7 +46,8 @@ public class Browser extends Sprite{
 		webview.viewPort = new Rectangle(0, toolbar.height, stage.stageWidth, stage.stageHeight - toolbar.height);
 		webview.stage = stage;
 		webview.loadURL("file:///");
-		webview.addEventListener("locationChanging", locationChangingHandler);
+		webview.addEventListener("locationChange", locationChangeHandler);
+		webview.userAgent = FIREFOX_USER_AGENT;
 		//webview.addEventListener("networkResourceRequested", networkResourceRequestedHandler);
 		toolbar.layout();
 
@@ -64,6 +66,10 @@ public class Browser extends Sprite{
 		toolbar.addChild(controls.urlField);
 		controls.urlField.addEventListener("keyDown", urlFieldKeyDownHandler);
 		controls.urlField.keyboardType = KeyboardType.URL;
+		/*controls["agentSettings"] = new LabelButton();
+		controls.agentSettings.label = "Change User-agent...";
+		toolbar.addChild(controls.agentSettings);
+		controls.agentSettings.addEventListener(*/
 		
 	}
 	protected function resizeControls():void{
@@ -77,6 +83,10 @@ public class Browser extends Sprite{
 	}
 	private function urlFieldKeyDownHandler(e:KeyboardEvent):void{
 		if(e.keyCode == 13){ //Enter key
+			var url:String = controls.urlField.text;
+			if(!isSupportedURL(url)){
+				url = "http://" + url;
+			}
 			try{
 				navigateToURL(controls.urlField.text);
 			}
@@ -84,10 +94,15 @@ public class Browser extends Sprite{
 			}
 		}
 	}
+	public function isSupportedURL(url:String):Boolean{
+		url = url.toLowerCase();
+		return url.substr(0, 5) == "http:" || url.substr(0,6) == "https:" ||
+			url.substr(0, 5) == "file:" || url.substr(0, 5) == "data:" || url.substr(0, 11) == "javascript:";
+	}
 	public function navigateToURL(newURL:String):void{
 		webview.loadURL(newURL);
 	}
-	private function locationChangingHandler(e:ExtendedLocationChangeEvent):void{
+	private function locationChangeHandler(e:ExtendedLocationChangeEvent):void{
 		controls.urlField.text = e.location;
 	}
 	/*private function networkResourceRequestedHandler(e:NetworkResourceRequestedEvent):void{
