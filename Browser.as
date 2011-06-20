@@ -88,7 +88,7 @@ public class Browser extends Sprite{
 				url = "http://" + url;
 			}
 			try{
-				navigateToURL(controls.urlField.text);
+				navigateToURL(url);
 			}
 			catch(e:Error){
 			}
