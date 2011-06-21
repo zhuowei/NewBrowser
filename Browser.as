@@ -20,7 +20,12 @@ import qnx.events.ExtendedLocationChangeEvent;
 
 [SWF(width="1024", height="600", frameRate="30", backgroundColor="#ffffff")]
 public class Browser extends Sprite{
-	public static const FIREFOX_USER_AGENT:String = "Mozilla/5.0 (Windows NT 6.1; rv:2.0.1) Gecko/20100101 Firefox/4.0.1"
+
+	public static const COMICSANS_STYLESHEET_URL:String = 'data:text/css;charset=utf-8,*{font-family%3A"Comic Sans MS"%2C sans-serif%3B}';
+	public static const COMICSANS_STYLESHEET:String = '* {font-family:"Comic Sans MS", sans-serif;}';
+	public static const INJECT_SCRIPT:String = 'var __comicsanscss = document.createElement("style"); ' + 
+			'__comicsanscss.innerHTML = \'* {font-family:"Comic Sans MS", sans-serif;}\';' + 
+			'document.getElementsByTagName("head")[0].appendChild(__comicsanscss);';
 	public var mainContainer:Container;
 	public var toolbar:Container;
 	public var controls:Dictionary = new Dictionary();
@@ -29,6 +34,8 @@ public class Browser extends Sprite{
 		buildUI();
 	}
 	protected function buildUI():void{
+		stage.scaleMode = StageScaleMode.NO_SCALE;
+		stage.align = StageAlign.TOP_LEFT;
 		mainContainer = new Container();
             	mainContainer.margins = Vector.<Number>([0,0,0,0]);
             	mainContainer.flow = ContainerFlow.VERTICAL;
@@ -45,11 +52,17 @@ public class Browser extends Sprite{
 		webview = new QNXStageWebView();
 		webview.viewPort = new Rectangle(0, toolbar.height, stage.stageWidth, stage.stageHeight - toolbar.height);
 		webview.stage = stage;
-		webview.loadURL("file:///");
+		webview.loadURL("about:blank");
 		webview.addEventListener("locationChange", locationChangeHandler);
-		webview.userAgent = FIREFOX_USER_AGENT;
-		//webview.addEventListener("networkResourceRequested", networkResourceRequestedHandler);
+		webview.addEventListener("documentLoaded", documentLoadedHandler);
+		webview.userStyleSheet = COMICSANS_STYLESHEET_URL;
 		toolbar.layout();
+		stage.addEventListener("orientationChange", function(e:Event):void{
+			resizeControls();
+		});
+		stage.addEventListener("resize", function(e:Event):void{
+			resizeControls();
+		});
 
 	}
 	protected function addButtons():void{
@@ -66,14 +79,13 @@ public class Browser extends Sprite{
 		toolbar.addChild(controls.urlField);
 		controls.urlField.addEventListener("keyDown", urlFieldKeyDownHandler);
 		controls.urlField.keyboardType = KeyboardType.URL;
-		/*controls["agentSettings"] = new LabelButton();
-		controls.agentSettings.label = "Change User-agent...";
-		toolbar.addChild(controls.agentSettings);
-		controls.agentSettings.addEventListener(*/
 		
 	}
 	protected function resizeControls():void{
-		webview.viewPort = new Rectangle(0, 50, stage.stageWidth, stage.stageHeight - 50);
+		mainContainer.setSize(stage.stageWidth, stage.stageHeight);
+		toolbar.setSize(mainContainer.width, 60);
+		webview.viewPort = new Rectangle(0, toolbar.height, stage.stageWidth, stage.stageHeight - toolbar.height);
+		toolbar.layout();
 	}
 	private function backButtonHandler(e:Event):void{
 		webview.historyBack();
@@ -96,7 +108,7 @@ public class Browser extends Sprite{
 	}
 	public function isSupportedURL(url:String):Boolean{
 		url = url.toLowerCase();
-		return url.substr(0, 5) == "http:" || url.substr(0,6) == "https:" ||
+		return url.substr(0, 5) == "http:" || url.substr(0,6) == "https:" || url.substr(0,6) == "about:" ||
 			url.substr(0, 5) == "file:" || url.substr(0, 5) == "data:" || url.substr(0, 11) == "javascript:";
 	}
 	public function navigateToURL(newURL:String):void{
@@ -105,10 +117,12 @@ public class Browser extends Sprite{
 	private function locationChangeHandler(e:ExtendedLocationChangeEvent):void{
 		controls.urlField.text = e.location;
 	}
-	/*private function networkResourceRequestedHandler(e:NetworkResourceRequestedEvent):void{
-		if(e.url.indexOf("googleadservices.com")!=-1 || e.url.indexOf("ad.doubleclick.net")!=-1){ //ads! Destroy!
-			e.action = NetworkResourceRequestedEvent.ACTION_DENY; //Take that!
-		}
-	}*/
+	private function documentLoadedHandler(e:Event):void{
+		injectStylesheet();
+	}
+	private function injectStylesheet():void{
+		webview.executeJavaScript(INJECT_SCRIPT);
+	}
+
 }
 }
