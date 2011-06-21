@@ -1,2 +1,5 @@
-This is a very simple browser for the Blackberry Playbook. It uses QNXStageWebView to display images. I wrote this to learn about the QNX UI toolkit.
-The icon is from http://commons.wikimedia.org/wiki/File:Deer_park_globe.svg.
+What's so special about web browsing with the new Comic Sans Browser for PlayBook?
+That's right, it reformats most of the text on a webpage with the Comic Sans font.
+So, unlike some browsers we could mention, the whole Internet looks childish, and not just parts of it.
+
+
